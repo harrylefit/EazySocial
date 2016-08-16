@@ -10,19 +10,22 @@ import android.widget.Toast;
 
 import com.eazy.longzma13.socialmanager.facebook.FacebookManager;
 import com.eazy.longzma13.socialmanager.google.GoogleManager;
+import com.eazy.longzma13.socialmanager.linkedin.LinkedInManager;
 import com.eazy.longzma13.socialmanager.twitter.TwitterManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.linkedin.platform.errors.LIApiError;
 
 import twitter4j.auth.AccessToken;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, TwitterManager.OnActionWhenTokenSuccessed, GoogleManager.OnGoogleSignInEvent, FacebookManager.OnFacebookEvent {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, TwitterManager.OnActionWhenTokenSuccessed, GoogleManager.OnGoogleSignInEvent, FacebookManager.OnFacebookEvent, LinkedInManager.OnDataLinkedinEvent {
     private Button btnTwitterLogin;
-    private TwitterManager twitterManager;
     private Button btnGoogleLogin;
     private Button btnFacebookLogin;
     private Button btnLinkedinLogin;
 
+    private TwitterManager twitterManager;
+    private LinkedInManager linkedInManager;
     private FacebookManager facebookManager;
     private GoogleManager googleManager;
 
@@ -51,6 +54,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         facebookManager = new FacebookManager();
         facebookManager.setOnFacebookEvent(this);
         btnFacebookLogin.setOnClickListener(this);
+
+        //TODO Linkedin
+        btnLinkedinLogin = (Button) findViewById(R.id.btnLinkedinLogin);
+        linkedInManager = new LinkedInManager(this);
+        linkedInManager.setOnDataLinkedinEvent(this);
+        btnLinkedinLogin.setOnClickListener(this);
     }
 
     @Override
@@ -65,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btnFacebookLogin:
                 facebookManager.login(this);
                 break;
+            case R.id.btnLinkedinLogin:
+
+                break;
         }
     }
 
@@ -74,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         twitterManager.onActivityResult(requestCode, resultCode, data);
         googleManager.onActivityResult(requestCode, resultCode, data);
         facebookManager.onActivityResult(requestCode, resultCode, data);
+        linkedInManager.onActivityResult(this,requestCode,resultCode,data);
     }
 
     @Override
@@ -104,5 +117,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onFacebookFailed() {
         Toast.makeText(getApplicationContext(), "Facebook failed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDataProfile(LinkedInManager.ProfileLinkedin profileLinkedin) {
+        Toast.makeText(getApplicationContext(), "Linkedin Success", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onErrorLinkedin(LIApiError liApiError) {
+        Toast.makeText(getApplicationContext(), "Linkedin failed", Toast.LENGTH_SHORT).show();
+
     }
 }
