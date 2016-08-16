@@ -92,6 +92,11 @@ public class FacebookManager implements BasicSocialManager {
         this.loginManager = loginManager;
     }
 
+    public FacebookManager(){
+        this.callbackManager = CallbackManager.Factory.create();
+        this.loginManager = LoginManager.getInstance();
+    }
+
     private class FacebookLoginCallback implements FacebookCallback<LoginResult> {
 
         @Override
