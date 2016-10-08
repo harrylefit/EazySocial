@@ -252,5 +252,6 @@ public class SocialManager implements BasicSocialManager {
     public void release() {
         this.mLoginEventProvider.release();
         this.mShareEventProvider.release();
+        this.mGoogleManager.release();
     }
 }

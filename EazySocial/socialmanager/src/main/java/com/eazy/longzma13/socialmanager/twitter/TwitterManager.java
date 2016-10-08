@@ -42,6 +42,14 @@ public class TwitterManager implements BasicSocialManager {
     private OnActionWhenTokenSuccessed onActionWhenTokenSuccessed;
     private OnShareEvent onShareEvent;
 
+
+    public TwitterManager(Context context,String consumerKey,String consumerSecret){
+        this.context = context;
+        this.consumerKey = consumerKey;
+        this.consumerSecret = consumerSecret;
+        initializeVariables();
+    }
+
     public TwitterManager(Context context) {
         this.context = context;
         this.consumerKey = PropertiesUtils.getProperties(context).getProperty("consumerKey");

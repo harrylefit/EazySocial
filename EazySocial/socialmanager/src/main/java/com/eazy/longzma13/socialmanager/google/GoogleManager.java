@@ -18,17 +18,19 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.PlusShare;
 
+import java.lang.ref.WeakReference;
+
 
 /**
  * Created by Harry on 7/1/16.
  */
 
-public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener,BasicSocialManager {
+public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener, BasicSocialManager {
     private static final int RC_SIGN_IN = 9001;
     private static final String TAG = "Google Manager";
     static final int PLUS_ONE_REQUEST = 0;
     private GoogleApiClient mGoogleApiClient;
-
+    private WeakReference<FragmentActivity> activityWeakReference;
     private OnGoogleSignInEvent onGoogleSignInEvent;
 
     public void setOnGooglePlusShareEvent(OnGooglePlusShareEvent onGooglePlusShareEvent) {
@@ -39,6 +41,7 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
 
     @Override
     public void share(String url, Fragment fragment) {
+        activityWeakReference = new WeakReference<>(fragment.getActivity());
         Intent shareIntent = new PlusShare.Builder(fragment.getContext())
                 .setContentUrl(Uri.parse(url))
                 .setText("Share")
@@ -53,6 +56,7 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
 
     @Override
     public void share(String url, Activity activity) {
+        activityWeakReference = new WeakReference<>((FragmentActivity) activity);
         Intent shareIntent = new PlusShare.Builder(activity.getBaseContext())
                 .setContentUrl(Uri.parse(url))
                 .setText("Share")
@@ -65,9 +69,17 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
         }
     }
 
+    public void release() {
+        if (activityWeakReference != null && activityWeakReference.get() != null && mGoogleApiClient != null) {
+            mGoogleApiClient.stopAutoManage(activityWeakReference.get());
+            mGoogleApiClient.disconnect();
+        }
+    }
+
 
     public interface OnGoogleSignInEvent {
         void onSuccessSignIn(GoogleSignInAccount googleSignInAccount);
+
         void onFailedSignIn();
     }
 
@@ -99,7 +111,7 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.w3
         mGoogleApiClient = new GoogleApiClient.Builder(activity)
-                .enableAutoManage((FragmentActivity)activity /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage((FragmentActivity) activity /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
     }
@@ -118,6 +130,7 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
             if (onGoogleSignInEvent != null) {
                 onGoogleSignInEvent.onSuccessSignIn(acct);
             }
+            Log.d(TAG, "Success googleplus");
 
         } else {
             // Signed out, show unauthenticated UI.
@@ -126,20 +139,30 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
 
     @Override
     public void login(Fragment fragment) {
-        init(fragment);
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        fragment.startActivityForResult(signInIntent, RC_SIGN_IN);
+        try {
+            activityWeakReference = new WeakReference<>(fragment.getActivity());
+            init(fragment);
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+            fragment.startActivityForResult(signInIntent, RC_SIGN_IN);
+        }catch (Exception ex){
+            Toast.makeText(fragment.getActivity().getApplicationContext(), "Already login in. You can not login again.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void login(Activity activity) {
-        init(activity);
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        activity.startActivityForResult(signInIntent, RC_SIGN_IN);
+        try {
+            activityWeakReference = new WeakReference<>((FragmentActivity) activity);
+            init(activity);
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+            activity.startActivityForResult(signInIntent, RC_SIGN_IN);
+        } catch (Exception ex) {
+            Toast.makeText(activity.getApplicationContext(), "Already login in. You can not login again.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public boolean checkStatus() {
-        if(onGoogleSignInEvent == null) {
+        if (onGoogleSignInEvent == null) {
             return false;
         }
         return true;
@@ -147,13 +170,13 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        switch (requestCode) {
             case RC_SIGN_IN:
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 handleSignInResult(result);
                 break;
             case PLUS_ONE_REQUEST:
-                switch(resultCode) {
+                switch (resultCode) {
                     case Activity.RESULT_OK:
                         //here the operation was successful
                         if (onGooglePlusShareEvent != null) {
@@ -175,8 +198,9 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
         this.onGoogleSignInEvent = onGoogleSignInEvent;
     }
 
-    public interface OnGooglePlusShareEvent{
+    public interface OnGooglePlusShareEvent {
         void onShareSuccessGooglePlus();
+
         void onShareCanceledGooglePlus();
     }
 }

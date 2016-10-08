@@ -3,7 +3,6 @@ package com.eazy.longzma13.demo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -38,7 +37,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         //TODO Twitter
-        twitterManager = new TwitterManager(getApplicationContext());
+        twitterManager = new TwitterManager(getApplicationContext(), "KptN5kaAQODw8gnJQjfWNvyRb", "mWNuDoHpIv5UMqhIrBUXsDRfJBy4FnkOq6wWsECs4k7xHESnH0");
+
         twitterManager.setOnActionWhenTokenSuccessed(this);
         btnTwitterLogin = (Button) findViewById(R.id.btnTwitterLogin);
         btnTwitterLogin.setOnClickListener(this);
@@ -81,12 +81,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        googleManager.release();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         twitterManager.onActivityResult(requestCode, resultCode, data);
         googleManager.onActivityResult(requestCode, resultCode, data);
         facebookManager.onActivityResult(requestCode, resultCode, data);
-        linkedInManager.onActivityResult(this,requestCode,resultCode,data);
+        linkedInManager.onActivityResult(this, requestCode, resultCode, data);
     }
 
     @Override
