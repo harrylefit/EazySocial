@@ -4,8 +4,6 @@ import com.eazy.longzma13.socialmanager.facebook.FacebookManager;
 import com.eazy.longzma13.socialmanager.google.GoogleManager;
 import com.eazy.longzma13.socialmanager.linkedin.LinkedInManager;
 import com.eazy.longzma13.socialmanager.twitter.TwitterManager;
-import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.linkedin.platform.errors.LIApiError;
 
 import twitter4j.auth.AccessToken;
@@ -78,9 +76,7 @@ public class LoginEventProvider implements SocialProvider {
     private class OnLoginFacebookEvent implements FacebookManager.OnFacebookEvent {
 
         @Override
-        public void onFacebookSuccess(LoginResult loginResult) {
-            InfoSocial infoSocial = getInfoSocial();
-            infoSocial.setUserId(loginResult.getAccessToken().getUserId());
+        public void onFacebookSuccess(InfoSocial infoSocial) {
             setLoginSuccesWithType(Type.FACEBOOK, infoSocial);
         }
 
@@ -93,16 +89,12 @@ public class LoginEventProvider implements SocialProvider {
     private class OnLoginGoogleEvent implements GoogleManager.OnGoogleSignInEvent {
 
         @Override
-        public void onSuccessSignIn(GoogleSignInAccount googleSignInAccount) {
-            InfoSocial infoSocial = getInfoSocial();
-            infoSocial.setUserId(googleSignInAccount.getId());
-            infoSocial.setEmail(googleSignInAccount.getEmail());
-            infoSocial.setFirstName(googleSignInAccount.getDisplayName());
+        public void onGoogleLoginSuccess(InfoSocial infoSocial) {
             setLoginSuccesWithType(Type.GOOGLE, infoSocial);
         }
 
         @Override
-        public void onFailedSignIn() {
+        public void onGoogleLoginFailed() {
             setLoginFailedWithType(Type.GOOGLE);
         }
     }

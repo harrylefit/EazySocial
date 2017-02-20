@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.eazy.longzma13.socialmanager.common.BasicSocialManager;
+import com.eazy.longzma13.socialmanager.common.InfoSocial;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -78,9 +79,9 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
 
 
     public interface OnGoogleSignInEvent {
-        void onSuccessSignIn(GoogleSignInAccount googleSignInAccount);
+        void onGoogleLoginSuccess(InfoSocial infoSocial);
 
-        void onFailedSignIn();
+        void onGoogleLoginFailed();
     }
 
 
@@ -128,7 +129,12 @@ public class GoogleManager implements GoogleApiClient.OnConnectionFailedListener
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             if (onGoogleSignInEvent != null) {
-                onGoogleSignInEvent.onSuccessSignIn(acct);
+                InfoSocial infoSocial = new InfoSocial();
+                infoSocial.setName(acct.getDisplayName());
+                infoSocial.setUserId(acct.getId());
+                infoSocial.setEmail(acct.getEmail());
+                infoSocial.setAccessToken(acct.getIdToken());
+                onGoogleSignInEvent.onGoogleLoginSuccess(infoSocial);
             }
             Log.d(TAG, "Success googleplus");
 

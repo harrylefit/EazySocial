@@ -4,19 +4,25 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.eazy.longzma13.socialmanager.common.BasicSocialManager;
+import com.eazy.longzma13.socialmanager.common.InfoSocial;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
+
+import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +82,7 @@ public class FacebookManager implements BasicSocialManager {
 
 
     public interface OnFacebookEvent {
-        void onFacebookSuccess(LoginResult loginResult);
+        void onFacebookSuccess(InfoSocial infoSocial);
 
         void onFacebookFailed();
     }
@@ -101,11 +107,25 @@ public class FacebookManager implements BasicSocialManager {
 
         @Override
         public void onSuccess(LoginResult loginResult) {
-            String fbAccessToken = loginResult.getAccessToken().getToken();
+            final String fbAccessToken = loginResult.getAccessToken().getToken();
             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(TOKEN_FB_KEY,fbAccessToken);
-            if (onFacebookEvent != null) {
-                onFacebookEvent.onFacebookSuccess(loginResult);
-            }
+            Bundle parameters = new Bundle();
+            parameters.putString("fields", "id,name,email");
+            GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
+                @Override
+                public void onCompleted(JSONObject object, GraphResponse response) {
+                    if (onFacebookEvent != null) {
+                        InfoSocial infoSocial = new InfoSocial();
+                        infoSocial.setAccessToken(fbAccessToken);
+                        infoSocial.setName(object.optString("name"));
+                        infoSocial.setEmail(object.optString("email"));
+                        infoSocial.setUserId(object.optString("id"));
+                        onFacebookEvent.onFacebookSuccess(infoSocial);
+                    }
+                }
+            });
+            request.setParameters(parameters);
+            request.executeAsync();
         }
 
         @Override

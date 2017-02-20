@@ -3,16 +3,16 @@ package com.eazy.longzma13.demo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.eazy.longzma13.socialmanager.common.InfoSocial;
 import com.eazy.longzma13.socialmanager.facebook.FacebookManager;
 import com.eazy.longzma13.socialmanager.google.GoogleManager;
 import com.eazy.longzma13.socialmanager.linkedin.LinkedInManager;
 import com.eazy.longzma13.socialmanager.twitter.TwitterManager;
-import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.linkedin.platform.errors.LIApiError;
 
 import twitter4j.auth.AccessToken;
@@ -105,19 +105,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toast.makeText(getApplicationContext(), "Twitter failed", Toast.LENGTH_SHORT).show();
     }
 
+
     @Override
-    public void onSuccessSignIn(GoogleSignInAccount googleSignInAccount) {
-        Toast.makeText(getApplicationContext(), "Google success", Toast.LENGTH_SHORT).show();
+    public void onGoogleLoginSuccess(InfoSocial infoSocial) {
+        Log.i("Social Google", "Name: " + infoSocial.getName() + "  -  Token:" + infoSocial.getUserId());
     }
 
     @Override
-    public void onFailedSignIn() {
+    public void onGoogleLoginFailed() {
         Toast.makeText(getApplicationContext(), "Google failed", Toast.LENGTH_SHORT).show();
     }
 
+
     @Override
-    public void onFacebookSuccess(LoginResult loginResult) {
-        Toast.makeText(getApplicationContext(), "Facebook success", Toast.LENGTH_SHORT).show();
+    public void onFacebookSuccess(InfoSocial infoSocial) {
+        Log.i("Social Facebook", "Name: " + infoSocial.getName() + "  -  Token:" + infoSocial.getAccessToken());
     }
 
     @Override

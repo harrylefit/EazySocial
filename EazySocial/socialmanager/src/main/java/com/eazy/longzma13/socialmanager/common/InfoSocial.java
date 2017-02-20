@@ -10,6 +10,8 @@ public class InfoSocial {
     private String firstName;
     private String email;
     private String phone;
+    private String name;
+    private String accessToken;
 
     public String getUserId() {
         return userId;
@@ -37,6 +39,8 @@ public class InfoSocial {
         this.email = null;
         this.firstName = null;
         this.lastName = null;
+        this.name = null;
+        this.accessToken = null;
     }
 
     public void setUserId(String userId) {
@@ -57,5 +61,21 @@ public class InfoSocial {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 }
